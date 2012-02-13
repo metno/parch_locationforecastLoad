@@ -7,7 +7,7 @@ Standards-Version: 3.9.1
 
 Package: parch-locationforecastload
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, locationforecastload
 Description: Loads several locations from api.met.no/locationforecast into a wdb databasei
  This is a wrapper script for locationForecastLoad. It calls that program for 
  all norwegian stations with a wmo number in the wdb database. Likewise, it 

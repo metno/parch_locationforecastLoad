@@ -3,10 +3,10 @@ Section: science
 Priority: extra
 Maintainer: Vegard Bones <vegard.bones@met.no>
 Build-Depends: debhelper (>= 7), help2man
-Standards-Version: 3.8.3
+Standards-Version: 3.9.1
 
 Package: parch-locationforecastload
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Loads several locations from api.met.no/locationforecast into a wdb databasei
  This is a wrapper script for locationForecastLoad. It calls that program for 

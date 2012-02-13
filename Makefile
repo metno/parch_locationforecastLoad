@@ -16,10 +16,10 @@ mandir = /usr/share/man/man1
 all:	$(BUILT_FILES)
 
 install: all
-	mkdir -p $(DESTDIR)$(sysconfdir)  && install -t$(DESTDIR)$(sysconfdir) $(CONFIG_FILES)
-	mkdir -p $(DESTDIR)$(datarootdir) && install -t$(DESTDIR)$(datarootdir) $(SQL_FILES)
+	mkdir -p $(DESTDIR)$(sysconfdir)  && install -m644 -t$(DESTDIR)$(sysconfdir) $(CONFIG_FILES)
+	mkdir -p $(DESTDIR)$(datarootdir) && install -m644 -t$(DESTDIR)$(datarootdir) $(SQL_FILES)
+	mkdir -p $(DESTDIR)$(mandir)      && install -m644 -t$(DESTDIR)$(mandir) $(MAN_FILES)
 	mkdir -p $(DESTDIR)$(bindir)      && install -t$(DESTDIR)$(bindir) $(SCRIPTS)
-	mkdir -p $(DESTDIR)$(mandir)      && install -t$(DESTDIR)$(mandir) $(MAN_FILES)
 
 
 uninstall:
@@ -47,7 +47,7 @@ parch-locationforecastload-$(VERSION).tar.gz: $(SCRIPTS) $(SQL_FILES) $(CONFIG_F
 	rm -rf parch_locationforecastLoad-$(VERSION)
 
 debian: dist
-	dpkg-buildpackage
+	dpkg-buildpackage -i -us -uc -rfakeroot
 
 
 .PHONY = all install uninstall clean distclean check installcheck dist

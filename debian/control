@@ -1,0 +1,15 @@
+Source: parch-locationforecastload
+Section: science 
+Priority: extra
+Maintainer: Vegard Bones <vegard.bones@met.no>
+Build-Depends: debhelper (>= 7), help2man
+Standards-Version: 3.8.3
+
+Package: parch-locationforecastload
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Loads several locations from api.met.no/locationforecast into a wdb databasei
+ This is a wrapper script for locationForecastLoad. It calls that program for 
+ all norwegian stations with a wmo number in the wdb database. Likewise, it 
+ calls locationforecastLoad for all stations mentioned in a file.
+

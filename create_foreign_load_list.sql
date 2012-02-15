@@ -2,7 +2,7 @@
 -- psql -At -Uwdb wdb < create_foreign_load_list.sql | grep '^[0-9]*$'
 
 CREATE TEMP TABLE foreign_stations (wmo_no text, station text);
-COPY foreign_stations FROM '/usr/share/parch_locationforecastLoad/foreign_stations.dat' CSV;
+COPY foreign_stations FROM '__STATIONS_LIST__' CSV;
 
 SELECT wci.begin('wdb', 88,4365,88);
 SELECT 

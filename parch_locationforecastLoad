@@ -1,15 +1,24 @@
 #!/bin/sh
 
+set -e
+
 DATABASE=wdb
 USERNAME=
 HOSTNAME=
 PORT=
 
-FOREIGN_STATIONS=/etc/parch_locationforecastLoad/foreign_stations.dat
+AUTOMATIC_STATIONS=true
+
+SQLDIR=.
+CONFDIR=.
+#SQLDIR=/usr/share/parch_locationforecastLoad
+#CONFDIR=/etc/parch_locationforecastLoad
+
+EXTRA_STATIONS=$CONFDIR/foreign_stations.dat
 
 version()
 {
-	echo parse.sh 0.1
+	echo $1 0.1
 }
 
 help()
@@ -18,7 +27,8 @@ help()
 
 This is a wrapper script for locationForecastLoad. It calls that program for 
 all norwegian stations with a wmo number in the wdb database. Likewise, it 
-calls locationforecastLoad for all stations mentioned in a file.
+calls locationforecastLoad for all stations mentioned in a file. By default,
+the file $EXTRA_STATIONS will be loaded
 
 Options:
 
@@ -27,6 +37,9 @@ Options:
   -u [ --user ] arg            Database user name
   -p [ --port ] arg            Database port number to connect to
 
+  --no-automatic-stations      Skip loading of stations based on any algorithm
+  --load-file arg                Load stations from the given file instead of 
+                               the default file
 "	
 }
 
@@ -46,7 +59,7 @@ wdb_arguments()
 	[ -z $PORT ] || echo -n "-p$PORT "
 }
 
-TEMP=`getopt -o d:h:u:U:p: --long version,help,database:,host:,username:,port: -n $1 -- "$@"`
+TEMP=`getopt -o d:h:u:U:p: --long version,help,database:,host:,username:,port:,no-automatic-stations,load-file: -n $1 -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 
@@ -77,6 +90,14 @@ while true; do
 			PORT=$2
 			shift 2
 			;;
+		--no-automatic-stations)
+			AUTOMATIC_STATIONS=false
+			shift
+			;;
+		--load-file)
+			EXTRA_STATIONS=$2
+			shift 2
+			;;			
 		--)
 			shift
 			break
@@ -94,5 +115,13 @@ PSQL="psql -At `psql_arguments`"
 LOAD="locationforecastLoad `wdb_arguments` --loglevel=2"
 
 
-$PSQL < /usr/share/parch_locationforecastLoad/create_norwegian_load_list.sql | grep -v SELECT | xargs $LOAD
-$PSQL < /usr/share/parch_locationforecastLoad/create_foreign_load_list.sql | grep '^[0-9]*$' | xargs $LOAD
+
+if [ $AUTOMATIC_STATIONS = true ]; then
+	$PSQL < $SQLDIR/create_norwegian_load_list.sql | grep -v SELECT | xargs $LOAD
+fi
+
+for FILE in $EXTRA_STATIONS; do
+	ABSOLUTE_PATH=`readlink -f $FILE`
+	echo $ABSOLUTE_PATH
+	sed s,__STATIONS_LIST__,/$ABSOLUTE_PATH,g $SQLDIR/create_foreign_load_list.sql | $PSQL | xargs $LOAD
+done

@@ -1,4 +1,4 @@
-VERSION = 0.1.0
+VERSION = 0.2.0
 
 SCRIPTS = parch_locationforecastLoad
 SQL_FILES = create_foreign_load_list.sql  create_norwegian_load_list.sql
@@ -43,11 +43,11 @@ parch-locationforecastload-$(VERSION).tar.gz: $(SCRIPTS) $(SQL_FILES) $(CONFIG_F
 	rm -rf parch_locationforecastLoad-$(VERSION)
 	mkdir parch_locationforecastLoad-$(VERSION)
 	cp $^ parch_locationforecastLoad-$(VERSION)
-	tar czf $@ parch_locationforecastLoad-$(VERSION)
+	tar --exclude-vcs czf $@ parch_locationforecastLoad-$(VERSION)
 	rm -rf parch_locationforecastLoad-$(VERSION)
 
 debian: dist
-	dpkg-buildpackage -i -us -uc -rfakeroot
+	debuild -us -uc
 
 
 .PHONY = all install uninstall clean distclean check installcheck dist

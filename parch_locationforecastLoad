@@ -12,10 +12,10 @@ PORT=
 
 AUTOMATIC_STATIONS=true
 
-SQLDIR=.
-CONFDIR=.
-#SQLDIR=/usr/share/parch_locationforecastLoad
-#CONFDIR=/etc/parch_locationforecastLoad
+#SQLDIR=.
+#CONFDIR=.
+SQLDIR=/usr/share/parch_locationforecastLoad
+CONFDIR=/etc/parch_locationforecastLoad
 
 EXTRA_STATIONS=$CONFDIR/foreign_stations.dat
 

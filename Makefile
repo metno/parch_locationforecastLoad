@@ -1,4 +1,4 @@
-VERSION = 0.2.0
+VERSION = 0.5.0
 
 SCRIPTS = parch_locationforecastLoad
 SQL_FILES = create_foreign_load_list.sql  create_norwegian_load_list.sql

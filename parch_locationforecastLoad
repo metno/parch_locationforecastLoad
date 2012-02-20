@@ -3,7 +3,7 @@
 set -e
 
 PROGRAM=$0
-VERSION=0.2.0
+VERSION=0.5.0
 
 DATABASE=wdb
 USERNAME=
@@ -115,7 +115,7 @@ done
 
 
 PSQL="psql -At `psql_arguments`"
-LOAD="locationforecastLoad `wdb_arguments`"
+LOAD="locationforecastLoad `wdb_arguments` --namespace=88,123,88"
 
 
 

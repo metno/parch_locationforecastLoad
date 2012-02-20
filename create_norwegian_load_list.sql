@@ -1,7 +1,7 @@
 -- Run like this:
 -- psql -At -Uwdb wdb < create_norwegian_load_list.sql | grep -v SELECT > destination.file.txt
 
-SELECT wci.begin('wdb', 88,4365,88);
+SELECT wci.begin('wdb', 88,456,88);
 
 SELECT 
        placeid INTO TEMP TABLE place 
@@ -13,7 +13,7 @@ WHERE
 
 
 
-SELECT wci.begin('wdb', 88, 88, 88);
+SELECT wci.begin('wdb', 88, 123, 88);
 
 SELECT 
        placename 

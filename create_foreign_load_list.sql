@@ -4,7 +4,7 @@
 CREATE TEMP TABLE foreign_stations (wmo_no text, station text);
 COPY foreign_stations FROM '__STATIONS_LIST__' CSV;
 
-SELECT wci.begin('wdb', 88,4365,88);
+SELECT wci.begin('wdb', 88,456,88);
 SELECT 
        placeid INTO TEMP TABLE place 
 FROM 
@@ -14,7 +14,7 @@ WHERE
 		SELECT wmo_no FROM foreign_stations
 	);
 	
-SELECT wci.begin('wdb', 88, 88, 88);
+SELECT wci.begin('wdb', 88, 123, 88);
 SELECT 
        placename 
 FROM 

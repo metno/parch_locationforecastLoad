@@ -4,7 +4,7 @@ PROJECT = parch-util
 
 SCRIPTS = parch_locationforecastLoad parch_stationlist parch_create_ncml_template
 CONFIG_FILES = foreign_stations.txt
-MAN_FILES = parch_locationforecastLoad.1 parch_stationlist.1
+MAN_FILES = parch_locationforecastLoad.1 parch_stationlist.1 parch_create_ncml_template.1
 
 BUILT_FILES = $(MAN_FILES)
 
@@ -57,3 +57,7 @@ parch_locationforecastLoad.1: parch_locationforecastLoad
 
 parch_stationlist.1:	parch_stationlist
 	help2man -n "Obtain a list of stations to load into parch" -N ./$< > $@
+
+parch_create_ncml_template.1: parch_create_ncml_template
+	help2man -n "Generate a netcdf file for use with fimex' interpolate.template option" -N ./$< > $@
+	

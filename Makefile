@@ -1,15 +1,16 @@
 VERSION = 0.5.0
 
-SCRIPTS = parch_locationforecastLoad
-SQL_FILES = create_foreign_load_list.sql  create_norwegian_load_list.sql
-CONFIG_FILES = foreign_stations.dat
-MAN_FILES = parch_locationforecastLoad.1
+PROJECT = parch-util
+
+SCRIPTS = parch_locationforecastLoad parch_stationlist parch_create_ncml_template.py
+CONFIG_FILES = foreign_stations.txt
+MAN_FILES = parch_locationforecastLoad.1 parch_stationlist.1
 
 BUILT_FILES = $(MAN_FILES)
 
 bindir = /usr/bin
-datarootdir = /usr/share/parch_locationforecastLoad
-sysconfdir = /etc/parch_locationforecastLoad
+datarootdir = /usr/share/$(PROJECT)
+sysconfdir = /etc/$(PROJECT)
 mandir = /usr/share/man/man1
 
 
@@ -17,7 +18,6 @@ all:	$(BUILT_FILES)
 
 install: all
 	mkdir -p $(DESTDIR)$(sysconfdir)  && install -m644 -t$(DESTDIR)$(sysconfdir) $(CONFIG_FILES)
-	mkdir -p $(DESTDIR)$(datarootdir) && install -m644 -t$(DESTDIR)$(datarootdir) $(SQL_FILES)
 	mkdir -p $(DESTDIR)$(mandir)      && install -m644 -t$(DESTDIR)$(mandir) $(MAN_FILES)
 	mkdir -p $(DESTDIR)$(bindir)      && install -t$(DESTDIR)$(bindir) $(SCRIPTS)
 
@@ -25,7 +25,6 @@ install: all
 uninstall:
 	@for F in $(MAN_FILES); do echo rm -f $(mandir)/$$F; done
 	@for F in $(SCRIPTS); do echo rm -f $(bindir)/$$F; done
-	@for F in $(SQL_FILES); do echo rm -f $(datarootdir)/$$F; done
 	@for F in $(CONFIG_FILES); do echo rm -f $(sysconfdir)/$$F; done
 
 clean:
@@ -37,14 +36,14 @@ check:
 
 installcheck: check
 
-dist:	parch-locationforecastload-$(VERSION).tar.gz
+dist:	$(PROJECT)-$(VERSION).tar.gz
 
-parch-locationforecastload-$(VERSION).tar.gz: $(SCRIPTS) $(SQL_FILES) $(CONFIG_FILES) Makefile
-	rm -rf parch_locationforecastLoad-$(VERSION)
-	mkdir parch_locationforecastLoad-$(VERSION)
-	cp $^ parch_locationforecastLoad-$(VERSION)
-	tar czf $@ parch_locationforecastLoad-$(VERSION)
-	rm -rf parch_locationforecastLoad-$(VERSION)
+$(PROJECT)-$(VERSION).tar.gz: $(SCRIPTS) $(SQL_FILES) $(CONFIG_FILES) Makefile
+	rm -rf $(PROJECT)-$(VERSION)
+	mkdir $(PROJECT)-$(VERSION)
+	cp $^ $(PROJECT)-$(VERSION)
+	tar czf $@ $(PROJECT)-$(VERSION)
+	rm -rf $(PROJECT)-$(VERSION)
 
 debian: dist
 	debuild -us -uc
@@ -55,3 +54,6 @@ debian: dist
 
 parch_locationforecastLoad.1: parch_locationforecastLoad
 	help2man -n "Loads several locations from api.met.no/locationforecast into a wdb database" -N ./$< > $@
+
+parch_stationlist.1:	parch_stationlist
+	help2man -n "Obtain a list of stations to load into parch" -N ./$< > $@

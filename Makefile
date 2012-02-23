@@ -2,7 +2,7 @@ VERSION = 0.5.0
 
 PROJECT = parch-util
 
-SCRIPTS = parch_locationforecastLoad parch_stationlist parch_create_ncml_template.py
+SCRIPTS = parch_locationforecastLoad parch_stationlist parch_create_ncml_template
 CONFIG_FILES = foreign_stations.txt
 MAN_FILES = parch_locationforecastLoad.1 parch_stationlist.1
 

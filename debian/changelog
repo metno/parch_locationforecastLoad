@@ -1,3 +1,9 @@
+parch-util (0.6.0) lucid; urgency=low
+
+  * Lots and lots of stuff
+
+ -- Vegard Bones <vegard.bones@met.no>  Fri, 24 Feb 2012 10:27:40 +0100
+
 parch-util (0.5.0) lucid; urgency=low
 
   * Updates for specifying namespace in locationforecastLoad

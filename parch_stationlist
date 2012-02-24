@@ -10,14 +10,15 @@ import cStringIO
 
 def get_command_line_options():
     usage_summary = '%prog [options]'
-    program_description = 'Obtain a list of all stations that should be loaded into the parch database'
+    program_description = 'Obtain a sanitized list of all stations that should be loaded into the parch database'
     parser = OptionParser(usage = usage_summary, 
-                          version = '%prog 0.1', 
+                          version = '%prog 0.6', 
                           description = program_description,
                           conflict_handler = 'resolve')
 
     parser.add_option('--no-automatic-stations', action='store_false', dest='automatic_stations', help='Skip selecting stations, based on any algorithm')
     parser.add_option('--load-file', metavar='FILE', default='/etc/parch-util/foreign_stations.txt', help='Get extra stations list from the given file instead of the default file')
+    parser.add_option('--placenamespace', metavar='CODE', default=123, type='int', help='Use the given place namespace')
 
     db = parser.add_option_group('Database connection')
     db.add_option('-d', '--database', default='wdb', help='database name (ex. wdb)')
@@ -39,36 +40,45 @@ def get_connect_string(options):
     return connect.getvalue()
 
 
-def get_norwegian_stations(database_connection):
-    cursor = database_connection.cursor()
-    cursor.execute("SELECT wci.begin('wdb', 88,456,88)")
-    cursor.execute("SELECT placeid INTO TEMP TABLE place FROM wci.getplacepoint(NULL) WHERE placename::int >= 1000 AND placename::int <= 2000")
-    cursor.execute("SELECT wci.begin('wdb', 88,123,88)")
-    cursor.execute("SELECT placename FROM wci.getplacepoint(NULL) WHERE placeid in (SELECT placeid FROM place)")
-    result = cursor.fetchone()
-    while result is not None:
-        yield result[0]
-        result = cursor.fetchone()
-    
-def get_extra_stations(database_connection, wmo_number_list):
-    
-    cursor = database_connection.cursor()
-    for n in wmo_number_list:
-        if not n:
-            continue
+class StationGenerator(object):
+    def __init__(self, options):
+        self.connection = psycopg2.connect(get_connect_string(options))
+        self.output_placenamespace = options.placenamespace
+
+    def get_norwegian_stations(self):
+        cursor = self.connection.cursor()
         cursor.execute("SELECT wci.begin('wdb', 88,456,88)")
-        cursor.execute("SELECT placename FROM wci.getplacename(%s) WHERE placenamespaceid=123", (n,))
-        elements = cursor.fetchall()
-        length = len(elements)
-        if length == 0:
-            sys.stderr.write('No stationid for wmo number ' + str(n) + '\n')
-        elif length > 1:
-            sys.stderr.write('Many stationid for wmo number ' + str(n) + " ( ")
-            for n in elements:
-                sys.stderr.write(str(n[0]) + ' ')
-            sys.stderr.write(")\n")
+        if self.output_placenamespace != 456:
+            cursor.execute("SELECT placeid INTO TEMP TABLE place FROM wci.getplacepoint(NULL) WHERE placename::int >= 1000 AND placename::int <= 2000")
+            cursor.execute("SELECT wci.begin('wdb', 88,123,88)")
+            cursor.execute("SELECT placename FROM wci.getplacepoint(NULL) WHERE placeid in (SELECT placeid FROM place)")
         else:
-            yield elements[0][0]
+            cursor.execute("SELECT distinct placename FROM wci.getplacepoint(NULL) WHERE placename::int >= 1000 AND placename::int <= 2000")
+        result = cursor.fetchone()
+        while result is not None:
+            yield result[0]
+            result = cursor.fetchone()
+    
+    
+    def get_extra_stations(self, wmo_number_list):
+        
+        cursor = self.connection.cursor()
+        for n in wmo_number_list:
+            if not n:
+                continue
+            cursor.execute("SELECT wci.begin('wdb', 88,456,88)")
+            cursor.execute("SELECT distinct placename FROM wci.getplacename(%s) WHERE placenamespaceid=%s", (n, self.output_placenamespace))
+            elements = cursor.fetchall()
+            length = len(elements)
+            if length == 0:
+                sys.stderr.write('No stationid for wmo number ' + str(n) + '\n')
+            elif length > 1:
+                sys.stderr.write('Many stationid for wmo number ' + str(n) + " ( ")
+                for n in elements:
+                    sys.stderr.write(str(n[0]) + ' ')
+                sys.stderr.write(")\n")
+            else:
+                yield elements[0][0]
 
 
 def read_extra_data_file(file_name):
@@ -86,19 +96,19 @@ if __name__ == '__main__':
 
 
     try:
-        connection = psycopg2.connect(get_connect_string(options))
+        generator = StationGenerator(options)
     except Exception, e:
         sys.stderr.write('FATAL: %s\n' % (e,))
         sys.exit(1)
         
     try:
         if options.automatic_stations is None or options.automatic_stations == True:
-            for station in get_norwegian_stations(connection):
+            for station in generator.get_norwegian_stations():
                 print station
         
         if options.load_file:
             wmo_number_list = read_extra_data_file(options.load_file)
-            for station in get_extra_stations(connection, wmo_number_list):
+            for station in generator.get_extra_stations(wmo_number_list):
                 print station
     except Exception, e:
         sys.stderr.write('FATAL: %s\n' % (e,))

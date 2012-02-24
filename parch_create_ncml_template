@@ -4,8 +4,24 @@ import os
 import sys
 import string
 import cStringIO
-from optparse import OptionParser
+import optparse
 import psycopg2
+
+program_description = '''Create ncml output for stations, for use with fimex with the --interpolate.template option.
+
+This program expects a list of place names on stdin. It will then attempt to 
+interpret those places as wdb placenames. Using this data, it will generate 
+ncml output, suitable for running as an argument for the 
+--interpolate.template option in fimex.
+
+A normal run or this program may look something like this:
+
+<parch_stationlist | parch_create_ncml_template | ncgen -o my_file.nc>
+
+The file my_file.nc may then be used to extract point data from any 
+fimex-readable file.
+'''
+
 
 
 template_base = string.Template('''netcdf parch_extractor {
@@ -91,11 +107,12 @@ def get_ncml(stations):
 
 def get_command_line_options():
     usage_summary = '%prog [options]'
-    program_description = 'Create ncml output for stations, for use with fimex with the --interpolate.template option'
-    parser = OptionParser(usage = usage_summary, 
-                          version = '%prog 0.1', 
+    parser = optparse.OptionParser(usage = usage_summary, 
+                          version = '%prog 0.6', 
                           description = program_description,
                           conflict_handler = 'resolve')
+    
+    parser.add_option('--placenamespace', metavar='CODE', default=123, type='int', help='Use the given place namespace')
 
     db = parser.add_option_group('Database connection')
     db.add_option('-d', '--database', default='wdb', help='database name (ex. wdb)')
@@ -138,7 +155,7 @@ if __name__ == '__main__':
     try:
         connection = psycopg2.connect(get_connect_string(options))
         cursor = connection.cursor()
-        cursor.execute("SELECT wci.begin('wdb', 88,123,88)")
+        cursor.execute("SELECT wci.begin('wdb', 88,%s,88)", (options.placenamespace,))
     except Exception, e:
         sys.stderr.write('FATAL: %s\n' % (e,))
         sys.exit(1)

@@ -5,7 +5,7 @@ set -e
 ALL_OPTIONS=$*
 
 PROGRAM=$0
-VERSION=0.6.0
+VERSION=0.7.0
 
 DATABASE=wdb
 USERNAME=
@@ -107,4 +107,4 @@ done
 
 LOAD="locationforecastLoad `wdb_arguments` --namespace=88,456,88 --loglevel=2"
 
-$BINDIR/parch_stationlist $ALL_OPTIONS --placenamespace=456 | xargs $LOAD
+$BINDIR/parch_stationlist $ALL_OPTIONS --placenamespace=456 | xargs -r $LOAD

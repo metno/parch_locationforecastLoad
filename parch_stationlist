@@ -12,7 +12,7 @@ def get_command_line_options():
     usage_summary = '%prog [options]'
     program_description = 'Obtain a sanitized list of all stations that should be loaded into the parch database'
     parser = OptionParser(usage = usage_summary, 
-                          version = '%prog 0.6', 
+                          version = '%prog 0.7', 
                           description = program_description,
                           conflict_handler = 'resolve')
 
@@ -88,20 +88,16 @@ def read_extra_data_file(file_name):
     
 
 if __name__ == '__main__':
-    options, extra = get_command_line_options()
+
+    try:
+        options, extra = get_command_line_options()
     
-    if len(extra) > 0:
-        sys.stderr.write('Unrecognized options: ' + str(extra))
-        sys.exit(1)
+        if len(extra) > 0:
+            sys.stderr.write('Unrecognized options: ' + str(extra))
+            sys.exit(1)
 
-
-    try:
         generator = StationGenerator(options)
-    except Exception, e:
-        sys.stderr.write('FATAL: %s\n' % (e,))
-        sys.exit(1)
-        
-    try:
+
         if options.automatic_stations is None or options.automatic_stations == True:
             for station in generator.get_norwegian_stations():
                 print station

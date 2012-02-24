@@ -1,3 +1,9 @@
+parch-util (0.7.0) lucid; urgency=low
+
+  * handling errors more gracefully
+
+ -- Vegard Bones <vegard.bones@met.no>  Fri, 24 Feb 2012 15:17:49 +0100
+
 parch-util (0.6.0) lucid; urgency=low
 
   * Lots and lots of stuff

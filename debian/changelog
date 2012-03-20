@@ -1,3 +1,9 @@
+parch-util (0.8.0) lucid; urgency=low
+
+  * working version
+
+ -- Vegard Bønes <vegardb@wdb-dev3.met.no>  Tue, 20 Mar 2012 08:42:09 +0000
+
 parch-util (0.7.0) lucid; urgency=low
 
   * handling errors more gracefully

@@ -112,4 +112,5 @@ LOAD="wdb-fastload --namespace=88,456,88 `wdb_arguments`"
 
 for STATION in `$BINDIR/parch_stationlist $ALL_OPTIONS --placenamespace=456`; do
      $CREATE_LOAD_DATA $STATION | $LOAD || true
+     sleep 0.1
 done

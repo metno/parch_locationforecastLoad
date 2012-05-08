@@ -2,4 +2,9 @@
 .project
 parch-locationforecastload-*.tar.gz
 parch_locationforecastLoad.1
+.pydevproject
+debian/files
+debian/parch-util.debhelper.log
+debian/parch-util.substvars
+debian/parch-util/
 

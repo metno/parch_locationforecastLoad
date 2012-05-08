@@ -10,7 +10,7 @@ import cStringIO
 
 def get_command_line_options():
     usage_summary = '%prog [options]'
-    program_description = 'Obtain a sanitized list of all stations that should be loaded into the parch database'
+    program_description = 'Obtain a sanitized list of locations of all stations that should be loaded into the parch database'
     parser = OptionParser(usage = usage_summary, 
                           version = '%prog 0.7', 
                           description = program_description,
@@ -18,7 +18,7 @@ def get_command_line_options():
 
     parser.add_option('--no-automatic-stations', action='store_false', dest='automatic_stations', help='Skip selecting stations, based on any algorithm')
     parser.add_option('--load-file', metavar='FILE', default='/etc/parch-util/foreign_stations.txt', help='Get extra stations list from the given file instead of the default file')
-    parser.add_option('--placenamespace', metavar='CODE', default=123, type='int', help='Use the given place namespace')
+    parser.add_option('--url', action='store_true', dest='print_urls', help='instead of coordinates, print URL to acquire data from api.met.no')
 
     db = parser.add_option_group('Database connection')
     db.add_option('-d', '--database', default='wdb', help='database name (ex. wdb)')
@@ -43,20 +43,14 @@ def get_connect_string(options):
 class StationGenerator(object):
     def __init__(self, options):
         self.connection = psycopg2.connect(get_connect_string(options))
-        self.output_placenamespace = options.placenamespace
 
     def get_norwegian_stations(self):
         cursor = self.connection.cursor()
         cursor.execute("SELECT wci.begin('wdb', 88,456,88)")
-        if self.output_placenamespace != 456:
-            cursor.execute("SELECT placeid INTO TEMP TABLE place FROM wci.getplacepoint(NULL) WHERE placename::int >= 1000 AND placename::int <= 2000")
-            cursor.execute("SELECT wci.begin('wdb', 88,123,88)")
-            cursor.execute("SELECT placename FROM wci.getplacepoint(NULL) WHERE placeid in (SELECT placeid FROM place)")
-        else:
-            cursor.execute("SELECT distinct placename FROM wci.getplacepoint(NULL) WHERE placename::int >= 1000 AND placename::int <= 2000")
+        cursor.execute("SELECT x(placegeometry), y(placegeometry) FROM wci.getplacepoint(NULL) WHERE placename::int >= 1000 AND placename::int <= 2000")
         result = cursor.fetchone()
         while result is not None:
-            yield result[0]
+            yield result
             result = cursor.fetchone()
     
     
@@ -67,25 +61,27 @@ class StationGenerator(object):
             if not n:
                 continue
             cursor.execute("SELECT wci.begin('wdb', 88,456,88)")
-            cursor.execute("SELECT distinct placename FROM wci.getplacename(%s) WHERE placenamespaceid=%s", (n, self.output_placenamespace))
+            cursor.execute("SELECT x(placegeometry), y(placegeometry) FROM wci.getplacepoint(%s)", (n,))
             elements = cursor.fetchall()
             length = len(elements)
             if length == 0:
-                sys.stderr.write('No stationid for wmo number ' + str(n) + '\n')
+                sys.stderr.write('No location for wmo number ' + str(n) + '\n')
             elif length > 1:
-                sys.stderr.write('Many stationid for wmo number ' + str(n) + " ( ")
+                sys.stderr.write('Many locations for wmo number ' + str(n) + " ( ")
                 for n in elements:
-                    sys.stderr.write(str(n[0]) + ' ')
+                    sys.stderr.write('%f,%f ' % (n[0], n[1]))
                 sys.stderr.write(")\n")
             else:
-                yield elements[0][0]
+                yield elements[0]
 
 
 def read_extra_data_file(file_name):
     f = file(file_name)
     for line in f:
         yield line.split(',')[0].strip()
-    
+
+def print_url(lonlat):
+    print 'http://api.met.no/weatherapi/locationforecast/1.8/?lat=%f;lon=%f' % (lonlat[0], lonlat[1]) 
 
 if __name__ == '__main__':
 
@@ -100,12 +96,18 @@ if __name__ == '__main__':
 
         if options.automatic_stations is None or options.automatic_stations == True:
             for station in generator.get_norwegian_stations():
-                print station
+                if options.print_urls:
+                    print_url(station)
+                else:
+                    print station[0], station[1]
         
         if options.load_file:
             wmo_number_list = read_extra_data_file(options.load_file)
             for station in generator.get_extra_stations(wmo_number_list):
-                print station
+                if options.print_urls:
+                    print_url(station)
+                else:
+                    print station[0], station[1]
     except Exception, e:
         sys.stderr.write('FATAL: %s\n' % (e,))
         sys.exit(1)

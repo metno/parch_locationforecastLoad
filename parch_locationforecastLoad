@@ -14,11 +14,6 @@ PORT=
 
 AUTOMATIC_STATIONS=true
 
-#BINDIR=.
-#CONFDIR=.
-BINDIR=/usr/bin/
-CONFDIR=/etc/parch-util
-
 version()
 {
 	echo $PROGRAM $VERSION
@@ -105,6 +100,7 @@ while true; do
 done
 
 
-LOAD="locationforecastLoad `wdb_arguments` --namespace=88,456,88 --loglevel=2"
+LOAD="locationforecastLoad --list"
+FASTLOAD="wdb-fastload `wdb_arguments`" 
 
-$BINDIR/parch_stationlist $ALL_OPTIONS --placenamespace=456 | xargs -r $LOAD
+parch_stationlist $ALL_OPTIONS | xargs -r $LOAD | $FASTLOAD

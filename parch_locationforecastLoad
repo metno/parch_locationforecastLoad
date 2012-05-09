@@ -100,7 +100,7 @@ while true; do
 done
 
 LOAD="locationforecastLoad --list"
-FASTLOAD="wdb-fastload `wdb_arguments`" 
+FASTLOAD="wdb-fastload `wdb_arguments` --all-or-nothing" 
 
 #parch_stationlist $ALL_OPTIONS | xargs -r $LOAD | $FASTLOAD
 
@@ -112,3 +112,4 @@ for URL in `parch_stationlist $ALL_OPTIONS --url`; do
 done
 
 $FASTLOAD $LOAD_FILE
+

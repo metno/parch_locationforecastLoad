@@ -109,9 +109,9 @@ if __name__ == '__main__':
 
         for location in locations: 
             if options.print_urls:
-                print_url(station)
+                print get_url(location)
             else:
-                print station[0], station[1]
+                print location[1], location[0]
 
     except Exception, e:
         sys.stderr.write('FATAL: %s\n' % (e,))

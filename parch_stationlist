@@ -80,8 +80,19 @@ def read_extra_data_file(file_name):
     for line in f:
         yield line.split(',')[0].strip()
 
-def print_url(latlon):
-    print 'http://api.met.no/weatherapi/locationforecast/1.8/?lat=%f;lon=%f' % (latlon[1], latlon[0]) 
+def stations_to_list(options):
+    generator = StationGenerator(options)
+    if options.automatic_stations is None or options.automatic_stations == True:
+        for station in generator.get_norwegian_stations():
+            yield station
+            
+    if options.load_file:
+        wmo_number_list = read_extra_data_file(options.load_file)
+        for station in generator.get_extra_stations(wmo_number_list):
+            yield station
+
+def get_url(latlon):
+    return 'http://api.met.no/weatherapi/locationforecast/1.8/?lat=%f;lon=%f' % (latlon[1], latlon[0]) 
 
 if __name__ == '__main__':
 
@@ -92,22 +103,16 @@ if __name__ == '__main__':
             sys.stderr.write('Unrecognized options: ' + str(extra))
             sys.exit(1)
 
-        generator = StationGenerator(options)
+        locations = {}
+        for station in stations_to_list(options):
+            locations[station] = None
 
-        if options.automatic_stations is None or options.automatic_stations == True:
-            for station in generator.get_norwegian_stations():
-                if options.print_urls:
-                    print_url(station)
-                else:
-                    print station[0], station[1]
-        
-        if options.load_file:
-            wmo_number_list = read_extra_data_file(options.load_file)
-            for station in generator.get_extra_stations(wmo_number_list):
-                if options.print_urls:
-                    print_url(station)
-                else:
-                    print station[0], station[1]
+        for location in locations: 
+            if options.print_urls:
+                print_url(station)
+            else:
+                print station[0], station[1]
+
     except Exception, e:
         sys.stderr.write('FATAL: %s\n' % (e,))
         sys.exit(1)

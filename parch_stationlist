@@ -80,8 +80,8 @@ def read_extra_data_file(file_name):
     for line in f:
         yield line.split(',')[0].strip()
 
-def print_url(lonlat):
-    print 'http://api.met.no/weatherapi/locationforecast/1.8/?lat=%f;lon=%f' % (lonlat[0], lonlat[1]) 
+def print_url(latlon):
+    print 'http://api.met.no/weatherapi/locationforecast/1.8/?lat=%f;lon=%f' % (latlon[1], latlon[0]) 
 
 if __name__ == '__main__':
 

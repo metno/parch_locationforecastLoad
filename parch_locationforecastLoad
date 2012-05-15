@@ -100,7 +100,7 @@ while true; do
 done
 
 LOAD="locationforecastLoad --list"
-FASTLOAD="wdb-fastload `wdb_arguments`" 
+FASTLOAD="wdb-fastload `wdb_arguments` --all-or-nothing" 
 
 LOAD_FILE=/home/wdb/parch_locationforecastload.$PPID.`date +%Y%m%d%H`
 

@@ -102,13 +102,11 @@ done
 LOAD="locationforecastLoad --list"
 FASTLOAD="wdb-fastload `wdb_arguments`" 
 
-#parch_stationlist $ALL_OPTIONS | xargs -r $LOAD | $FASTLOAD
-
-LOAD_FILE=/tmp/parch_locationforecastload.$PPID.`date +%Y%m%d%H`
+LOAD_FILE=/home/wdb/parch_locationforecastload.$PPID.`date +%Y%m%d%H`
 
 for URL in `parch_stationlist $ALL_OPTIONS --url`; do
 	$LOAD $URL >> $LOAD_FILE
 	sleep 0.25
 done
 
-$FASTLOAD $LOAD_FILE
+$FASTLOAD $LOAD_FILE && rm $LOAD_FILE
